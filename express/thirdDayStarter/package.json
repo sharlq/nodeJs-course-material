@@ -1,0 +1,21 @@
+{
+  "name": "nodejs-course-material",
+  "version": "1.0.0",
+  "description": "Complete Node.js Course Material",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "start-server": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.18.3"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "express-validator": "^6.14.3"
+  }
+}
