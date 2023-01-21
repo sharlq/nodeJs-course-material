@@ -4,6 +4,8 @@ import validations from './validations.js';
 
 const app = express();
 
+app.use(express.json())
+
 app.post('/tasks', validations.postValidatorArray, validate, (req, res) => {
   res.send({
     id: '1',
