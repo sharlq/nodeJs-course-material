@@ -25,6 +25,11 @@ const User = sequelize.define(
         isEmail: true,
       },
     },
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
     tableName: 'users',
