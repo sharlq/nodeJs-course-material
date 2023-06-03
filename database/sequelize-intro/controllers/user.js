@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const { validationResult } = require('express-validator');
+const auth = require('../utils/auth');
 
 // GET /users - Retrieve all users
 exports.getAllUsers = async (req, res) => {
@@ -13,9 +15,24 @@ exports.getAllUsers = async (req, res) => {
 
 // POST /users - Create a new user
 exports.create = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
-    const { firstName, lastName, email } = req.body;
-    const user = await User.create({ firstName, lastName, email });
+    const { firstName, lastName, email, password } = req.body;
+
+    const credentials = await auth.genPassword(password);
+
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: credentials.hash,
+      salt: credentials.salt,
+    });
     res.json(user);
   } catch (error) {
     console.error(error);
@@ -41,6 +58,12 @@ exports.getUserById = async (req, res) => {
 
 // PUT /users/:id - Update a specific user by ID
 exports.update = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { id } = req.params;
     const { firstName, lastName, email } = req.body;
@@ -77,6 +100,12 @@ exports.delete = async (req, res) => {
 
 // PATCH /users/:id - Update specific fields of a user
 exports.userActivation = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { id } = req.params;
     const { active } = req.body;

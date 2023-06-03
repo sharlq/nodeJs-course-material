@@ -30,6 +30,19 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    salt: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.ENUM('ADMIN', 'EMPLOYEE', 'NORMAL'),
+      allowNull: false,
+      defaultValue: 'NORMAL',
+    },
   },
   {
     tableName: 'users',

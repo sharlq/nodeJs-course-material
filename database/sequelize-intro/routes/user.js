@@ -1,119 +1,81 @@
 const { Router } = require('express');
 const UserController = require('../controllers/user');
+const { body } = require('express-validator');
+const authMiddleware = require('../middlewares/auth');
 
 const router = Router();
+
 // GET /users - Retrieve all users
-router.get('/users', UserController.getAllUsers);
+router.get('', authMiddleware.isUser, UserController.getAllUsers);
 
 // POST /users - Create a new user
-router.post('/users', UserController.create);
+router.post(
+  '',
+  [
+    body('firstName').notEmpty().withMessage('First name is required'),
+    body('lastName').notEmpty().withMessage('Last name is required'),
+    body('email').isEmail().withMessage('Invalid email'),
+    body('password')
+      .isStrongPassword({
+        minLength: 6,
+        minLowercase: 0,
+        minUppercase: 0,
+        minNumbers: 0,
+        minSymbols: 0,
+      })
+      .withMessage('password should be more than 6 characters'),
+    body('password_confirm').custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Password confirmation does not match');
+      }
+      return true;
+    }),
+  ],
+  UserController.create
+);
+
+// GET /users/watchHistory - Retrieve your watch list as a user
+router.get('/watchHistory', authMiddleware.validateAndGetUser, (req, res) => {
+  res.send({
+    youAre: req.user,
+    watchList: [
+      'Tackle',
+      'Quick Attack',
+      'Thunderbolt',
+      'Flamethrower',
+      'Water Gun',
+      'Leaf Blade',
+      'Rock Slide',
+      'Ice Beam',
+      'Earthquake',
+      'Psychic',
+    ],
+  });
+});
 
 // GET /users/:id - Retrieve a specific user by ID
-router.get('/users/:id', UserController.getUserById);
+router.get('/:id', UserController.getUserById);
 
 // PUT /users/:id - Update a specific user by ID
-router.put('/users/:id', UserController.update);
+router.put(
+  '/:id',
+  [
+    body('firstName').notEmpty().withMessage('First name is required'),
+    body('lastName').notEmpty().withMessage('Last name is required'),
+    body('email').isEmail().withMessage('Invalid email'),
+  ],
+  UserController.update
+);
 
 // DELETE /users/:id - Delete a specific user by ID
-router.delete('/users/:id', UserController.delete);
+router.delete('/:id', UserController.delete);
 
 // PATCH /users/:id - Update specific fields of a user
-router.patch('/users/:id', UserController.userActivation);
+router.patch(
+  '/:id',
+  [body('active').isBoolean().withMessage('Active should be boolean')],
+  authMiddleware.isAdmin,
+  UserController.userActivation
+);
 
 module.exports = router;
-
-/* 
-// GET /users - Retrieve all users
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.findAll();
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// POST /users - Create a new user
-app.post('/users', async (req, res) => {
-  try {
-    const { firstName, lastName, email } = req.body;
-    const user = await User.create({ firstName, lastName, email });
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// GET /users/:id - Retrieve a specific user by ID
-app.get('/users/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findByPk(id);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-    } else {
-      res.json(user);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// PUT /users/:id - Update a specific user by ID
-app.put('/users/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { firstName, lastName, email } = req.body;
-    const [updatedRowsCount] = await User.update(
-      { firstName, lastName, email },
-      { where: { id } }
-    );
-    if (updatedRowsCount === 0) {
-      res.status(404).json({ message: 'User not found' });
-    } else {
-      res.json({ message: 'User updated successfully' });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// DELETE /users/:id - Delete a specific user by ID
-app.delete('/users/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedRowCount = await User.destroy({ where: { id } });
-    if (deletedRowCount === 0) {
-      res.status(404).json({ message: 'User not found' });
-    } else {
-      res.json({ message: 'User deleted successfully' });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// PATCH /users/:id - Update specific fields of a user
-app.patch('/users/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { active } = req.body;
-    const [updatedRowsCount] = await User.update({ active }, { where: { id } });
-    if (updatedRowsCount === 0) {
-      res.status(404).json({ message: 'User not found' });
-    } else {
-      res.json({ message: 'User updated successfully' });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-module.exports = Router;
-*/
