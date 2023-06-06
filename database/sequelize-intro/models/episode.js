@@ -1,25 +1,39 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Episode extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+const { DataTypes } = require('sequelize');
+const sequelize = require('../utils/database');
+const TvSeries = require('./tvSeries');
+
+const Episode = sequelize.define(
+  'Episode',
+  {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    link: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    tvSeriesId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+  },
+  {
+    tableName: 'episodes',
   }
-  Episode.init({
-    title: DataTypes.STRING,
-    description: DataTypes.TEXT,
-    videoLink: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Episode',
-  });
-  return Episode;
-};
+);
+
+// Define the association between Episode and TVSeries models
+Episode.belongsTo(TvSeries, {
+  foreignKey: 'tvSeriesId',
+});
+TvSeries.hasMany(Episode, {
+  foreignKey: 'tvSeriesId',
+});
+
+module.exports = Episode;

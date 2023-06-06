@@ -1,11 +1,29 @@
 const User = require('../models/user');
 const { validationResult } = require('express-validator');
 const auth = require('../utils/auth');
+const Episode = require('../models/episode');
+const Watch = require('../models/watch');
 
 // GET /users - Retrieve all users
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// GET /users - Retrieve all users with the episodes they have watched
+exports.getAllUsersWithWatchHistory = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      include: {
+        model: Episode,
+        through: Watch,
+      },
+    });
     res.json(users);
   } catch (error) {
     console.error(error);

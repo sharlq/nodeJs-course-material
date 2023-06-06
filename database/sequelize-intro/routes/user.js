@@ -8,6 +8,9 @@ const router = Router();
 // GET /users - Retrieve all users
 router.get('', authMiddleware.isUser, UserController.getAllUsers);
 
+// GET /users - Retrieve all users
+router.get('/history', UserController.getAllUsersWithWatchHistory);
+
 // POST /users - Create a new user
 router.post(
   '',
